@@ -1,0 +1,12 @@
+{
+  "name": "lightnhope",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node api/post-entry.js",
+    "start": "node api/post-entry.js"
+  },
+  "dependencies": {
+    "googleapis": "^105.0.0"
+  }
+}
