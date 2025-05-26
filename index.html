@@ -64,8 +64,7 @@
 
       const res = await fetch(endpoint, {
         method: "POST",
-        body: form,
-        headers: {} // Verhindert automatisch gesetzten Content-Type
+        body: form
       });
 
       const result = await res.json();
@@ -150,5 +149,4 @@
   </script>
 </body>
 </html>
-
 
