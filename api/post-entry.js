@@ -30,10 +30,19 @@ export default async function handler(req, res) {
         body: new URLSearchParams(parsed)
       });
 
-      const data = await gsRes.json();
-      res.status(200).json(data);
+      const text = await gsRes.text();
+
+      try {
+        const data = JSON.parse(text);
+        if (!data.code) throw new Error("No code in response");
+        return res.status(200).json(data);
+      } catch (err) {
+        return res.status(502).json({ error: "Invalid response from script", raw: text });
+      }
+
     } catch (err) {
-      res.status(500).json({ error: "Server error", details: err.message });
+      return res.status(500).json({ error: "Server error", message: err.message });
     }
   });
 }
+
