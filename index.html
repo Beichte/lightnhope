@@ -47,8 +47,6 @@
   <div id="confirmation" style="margin-top:2rem; display:none;"></div>
 
   <script>
-    const endpoint = "/api/post-entry";
-
     document.getElementById("confessionForm").addEventListener("submit", async function(e) {
       e.preventDefault();
 
@@ -59,20 +57,21 @@
         allowShare: document.getElementById("allowShare").checked ? "yes" : "no"
       };
 
-      const form = new FormData();
-      Object.entries(data).forEach(([key, val]) => form.append(key, val));
+      try {
+        const res = await fetch("/api/post-entry", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
 
-      const res = await fetch(endpoint, {
-        method: "POST",
-        body: form
-      });
-
-      const result = await res.json();
-      const confirmation = document.getElementById("confirmation");
-      confirmation.style.display = "block";
-      confirmation.innerHTML = `<strong>Dein Code lautet:</strong> <code>${result.code}</code><br>Bitte gut notieren!`;
-
-      document.getElementById("confessionForm").reset();
+        const result = await res.json();
+        const confirmation = document.getElementById("confirmation");
+        confirmation.style.display = "block";
+        confirmation.innerHTML = `<strong>Dein Code lautet:</strong> <code>${result.code}</code><br>Bitte gut notieren!`;
+        document.getElementById("confessionForm").reset();
+      } catch (error) {
+        console.error("Fehler beim Absenden:", error);
+      }
     });
 
     const translations = {
@@ -149,7 +148,3 @@
   </script>
 </body>
 </html>
-
-</body>
-</html>
-
