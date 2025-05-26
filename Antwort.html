@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lightnhope – Antwort</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <nav style="margin-bottom: 2rem;">
+    <a href="/" style="margin-right: 1rem;">Start</a>
+    <a href="/erklaerung" style="margin-right: 1rem;">Erklärung</a>
+    <a href="/antwort" style="margin-right: 1rem;">Antwort anzeigen</a>
+    <a href="/berichte">Erfahrungsberichte</a>
+  </nav>
+
+  <select id="langSelector" onchange="setLanguage(this.value)">
+    <option value="de">Deutsch</option>
+    <option value="en">English</option>
+    <option value="es">Español</option>
+    <option value="it">Italiano</option>
+  </select>
+
+  <h1 data-key="headline">Deine Antwort</h1>
+  <p data-key="instruction">Gib deinen persönlichen Code ein, um deine Antwort zu sehen:</p>
+
+  <form>
+    <input type="text" placeholder="Dein persönlicher Code" required />
+    <button type="submit" data-key="submit">Antwort anzeigen</button>
+  </form>
+
+  <script>
+    const translations = {
+      de: {
+        headline: "Deine Antwort",
+        instruction: "Gib deinen persönlichen Code ein, um deine Antwort zu sehen:",
+        submit: "Antwort anzeigen"
+      },
+      en: {
+        headline: "Your Answer",
+        instruction: "Enter your personal code to view your response:",
+        submit: "Show Answer"
+      },
+      es: {
+        headline: "Tu respuesta",
+        instruction: "Introduce tu código personal para ver tu respuesta:",
+        submit: "Ver respuesta"
+      },
+      it: {
+        headline: "La tua risposta",
+        instruction: "Inserisci il tuo codice personale per visualizzare la risposta:",
+        submit: "Mostra la risposta"
+      }
+    };
+
+    const browserLang = navigator.language.slice(0, 2);
+    const defaultLang = ['de', 'en', 'es', 'it'].includes(browserLang) ? browserLang : 'de';
+    const savedLang = localStorage.getItem("lightnhopeLang") || defaultLang;
+    document.getElementById('langSelector').value = savedLang;
+    setLanguage(savedLang);
+
+    document.getElementById('langSelector').addEventListener("change", (e) => {
+      localStorage.setItem("lightnhopeLang", e.target.value);
+    });
+
+    function setLanguage(lang) {
+      document.querySelectorAll('[data-key]').forEach(el => {
+        const key = el.getAttribute('data-key');
+        if (translations[lang] && translations[lang][key]) {
+          el.innerHTML = translations[lang][key];
+        }
+      });
+    }
+  </script>
+</body>
+</html>
