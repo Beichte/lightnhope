@@ -1,164 +1,119 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lightnhope – Deine Nachricht</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Verborgene Stimme</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fdfcf8;
+      padding: 2rem;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+    }
+    .success {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: #e6ffe6;
+      border: 1px solid #4CAF50;
+      color: #003300;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
-  <nav style="margin-bottom: 2rem;">
-    <a href="/" style="margin-right: 1rem;">Start</a>
-    <a href="/erklaerung" style="margin-right: 1rem;">Erklärung</a>
-    <a href="/antwort" style="margin-right: 1rem;">Antwort anzeigen</a>
-    <a href="/berichte">Erfahrungsberichte</a>
-  </nav>
-  <select id="langSelector" onchange="setLanguage(this.value)">
-    <option value="de">Deutsch</option>
-    <option value="en">English</option>
-    <option value="es">Español</option>
-    <option value="it">Italiano</option>
-  </select>
 
-  <h1 data-key="headline">Was möchtest du teilen?</h1>
+  <form id="confess-form">
+    <label>I want to:</label><br>
+    <select name="type">
+      <option value="Confess something">Confess something</option>
+      <option value="Ask for support">Ask for support</option>
+    </select><br><br>
 
-  <form id="confessionForm">
-    <label for="type" data-key="typeLabel">Ich möchte:</label>
-    <select id="type" name="type">
-      <option value="confession" data-key="opt1">Etwas beichten</option>
-      <option value="help" data-key="opt2">Um Hilfe bitten</option>
-      <option value="give" data-key="opt3">Unterstützung geben</option>
-    </select>
+    <label>Your message:</label><br>
+    <textarea name="message" required></textarea><br><br>
 
-    <label for="message" data-key="msgLabel">Deine Nachricht:</label>
-    <textarea id="message" name="message" rows="6" required></textarea>
-
-    <label for="paypal" data-key="paypalLabel">(Optional) Deine PayPal-Adresse, falls du Hilfe erhoffst:</label>
-    <input type="email" id="paypal" name="paypal" placeholder="beispiel@mail.com" />
+    <label>(Optional) Your PayPal address, if you hope for help:</label><br>
+    <input type="email" name="paypal"><br><br>
 
     <label>
-      <input type="checkbox" id="allowShare" name="allowShare" />
-      <span data-key="shareConsent">Ich bin grundsätzlich einverstanden, dass meine Geschichte anonymisiert veröffentlicht werden darf.</span>
-    </label>
+      <input type="checkbox" name="allowShare">
+      I agree that my message may be shared anonymously.
+    </label><br><br>
 
-    <button type="submit" data-key="submit">Absenden</button>
+    <button type="submit">Submit</button>
   </form>
 
-  <div id="confirmation" style="margin-top:2rem; display:none;"></div>
+  <div id="success" class="success" style="display: none;"></div>
 
   <script>
-    const endpoint = "/api/post-entry";
+    const form = document.getElementById('confess-form');
+    const success = document.getElementById('success');
 
-    document.getElementById("confessionForm").addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      const data = {
-        type: document.getElementById("type").value,
-        message: document.getElementById("message").value,
-        paypal: document.getElementById("paypal").value,
-        allowShare: document.getElementById("allowShare").checked ? "yes" : "no"
-      };
-
-      try {
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`Fehler beim Absenden: ${errorText}`);
-        }
-
-        const result = await res.json();
-        const confirmation = document.getElementById("confirmation");
-        confirmation.style.display = "block";
-        confirmation.innerHTML = `<strong>Dein Code lautet:</strong> <code>${result.code}</code><br>Bitte gut notieren!`;
-
-        document.getElementById("confessionForm").reset();
-      } catch (err) {
-        alert(err.message);
-        console.error(err);
-      }
-    });
-
-    const translations = {
+    const messages = {
       de: {
-        headline: "Was möchtest du teilen?",
-        typeLabel: "Ich möchte:",
-        opt1: "Etwas beichten",
-        opt2: "Um Hilfe bitten",
-        opt3: "Unterstützung geben",
-        msgLabel: "Deine Nachricht:",
-        paypalLabel: "(Optional) Deine PayPal-Adresse, falls du Hilfe erhoffst:",
-        shareConsent: "Ich bin grundsätzlich einverstanden, dass meine Geschichte anonymisiert veröffentlicht werden darf.",
-        submit: "Absenden"
+        saved: '✅ Deine Nachricht wurde gespeichert!',
+        code: 'Dein Code:',
+        note: 'Bitte gut notieren!'
       },
       en: {
-        headline: "What would you like to share?",
-        typeLabel: "I want to:",
-        opt1: "Confess something",
-        opt2: "Ask for help",
-        opt3: "Give support",
-        msgLabel: "Your message:",
-        paypalLabel: "(Optional) Your PayPal address, if you hope for help:",
-        shareConsent: "I agree that my message may be shared anonymously.",
-        submit: "Submit"
+        saved: '✅ Your message has been saved!',
+        code: 'Your code:',
+        note: 'Please keep it safe!'
       },
       es: {
-        headline: "¿Qué quieres compartir?",
-        typeLabel: "Quiero:",
-        opt1: "Confesar algo",
-        opt2: "Pedir ayuda",
-        opt3: "Dar apoyo",
-        msgLabel: "Tu mensaje:",
-        paypalLabel: "(Opcional) Tu dirección de PayPal si esperas ayuda:",
-        shareConsent: "Acepto que mi historia pueda compartirse de forma anónima.",
-        submit: "Enviar"
+        saved: '✅ ¡Tu mensaje ha sido guardado!',
+        code: 'Tu código:',
+        note: '¡Guárdalo bien!'
       },
       it: {
-        headline: "Cosa vuoi condividere?",
-        typeLabel: "Vorrei:",
-        opt1: "Confessare qualcosa",
-        opt2: "Chiedere aiuto",
-        opt3: "Dare supporto",
-        msgLabel: "Il tuo messaggio:",
-        paypalLabel: "(Facoltativo) Il tuo indirizzo PayPal, se desideri aiuto:",
-        shareConsent: "Accetto che la mia storia possa essere condivisa in forma anonima.",
-        submit: "Invia"
+        saved: '✅ Il tuo messaggio è stato salvato!',
+        code: 'Il tuo codice:',
+        note: 'Per favore conservalo!' 
       }
     };
 
-    const browserLang = navigator.language.slice(0, 2);
-    const defaultLang = ['de', 'en', 'es', 'it'].includes(browserLang) ? browserLang : 'de';
-    const savedLang = localStorage.getItem("lightnhopeLang") || defaultLang;
-    document.getElementById('langSelector').value = savedLang;
-    setLanguage(savedLang);
-    document.getElementById('langSelector').addEventListener("change", (e) => {
-      localStorage.setItem("lightnhopeLang", e.target.value);
+    const lang = (navigator.language || 'en').slice(0, 2);
+    const t = messages[lang] || messages['en'];
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const body = {
+        type: formData.get('type'),
+        message: formData.get('message'),
+        paypal: formData.get('paypal'),
+        allowShare: formData.get('allowShare') ? 'yes' : '',
+      };
+
+      try {
+        const res = await fetch('/api/post-entry', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          success.style.display = 'block';
+          success.innerHTML = `
+            <p><strong>${t.saved}</strong></p>
+            <p><strong>${t.code}</strong> <code>${data.code}</code></p>
+            <p>${t.note}</p>
+          `;
+          form.reset();
+        } else {
+          success.style.display = 'block';
+          success.innerHTML = `<strong>Fehler:</strong> ${data.error || 'Unbekannter Fehler'}`;
+        }
+      } catch (err) {
+        success.style.display = 'block';
+        success.innerHTML = `<strong>Fehler beim Absenden:</strong> ${err.message}`;
+      }
     });
-
-    function setLanguage(lang) {
-      document.querySelectorAll('[data-key]').forEach(el => {
-        const key = el.getAttribute('data-key');
-        if (translations[lang] && translations[lang][key]) {
-          el.innerHTML = translations[lang][key];
-        }
-      });
-      const opts = document.querySelectorAll('option');
-      opts.forEach(opt => {
-        const key = opt.getAttribute('data-key');
-        if (translations[lang] && translations[lang][key]) {
-          opt.textContent = translations[lang][key];
-        }
-      });
-    }
-  </script>
-</body>
-</html>
-
-    }
   </script>
 </body>
 </html>
