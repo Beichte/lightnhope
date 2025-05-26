@@ -59,16 +59,19 @@
         allowShare: document.getElementById("allowShare").checked ? "yes" : "no"
       };
 
+      const form = new FormData();
+      Object.entries(data).forEach(([key, val]) => form.append(key, val));
+
       const res = await fetch(endpoint, {
         method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" }
+        body: form
       });
 
       const result = await res.json();
       const confirmation = document.getElementById("confirmation");
       confirmation.style.display = "block";
       confirmation.innerHTML = `<strong>Dein Code lautet:</strong> <code>${result.code}</code><br>Bitte gut notieren!`;
+
       document.getElementById("confessionForm").reset();
     });
 
@@ -146,5 +149,4 @@
   </script>
 </body>
 </html>
-
 
