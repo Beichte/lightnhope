@@ -16,11 +16,14 @@
     }
     .success {
       margin-top: 2rem;
-      padding: 1rem;
-      background: #e6ffe6;
-      border: 1px solid #4CAF50;
-      color: #003300;
-      border-radius: 4px;
+      padding: 1.5rem;
+      background: #d4f9d4;
+      border: 2px solid #2e7d32;
+      color: #1b4d1b;
+      border-radius: 6px;
+      font-size: 1.2rem;
+      text-align: center;
+      box-shadow: 0 0 10px rgba(0, 128, 0, 0.2);
     }
   </style>
 </head>
@@ -55,24 +58,28 @@
 
     const messages = {
       de: {
-        saved: '✅ Deine Nachricht wurde gespeichert!',
+        saved: '✅ Deine Nachricht wurde erfolgreich gesendet!',
+        received: 'Wir haben deine Nachricht erhalten.',
         code: 'Dein Code:',
-        note: 'Bitte gut notieren!'
+        note: 'Bitte notiere dir diesen Code – er ist der einzige Weg, deine Antwort zu lesen.'
       },
       en: {
-        saved: '✅ Your message has been saved!',
+        saved: '✅ Your message has been successfully sent!',
+        received: 'We have received your message.',
         code: 'Your code:',
-        note: 'Please keep it safe!'
+        note: 'Please save this code – it is the only way to read your answer.'
       },
       es: {
-        saved: '✅ ¡Tu mensaje ha sido guardado!',
+        saved: '✅ ¡Tu mensaje ha sido enviado con éxito!',
+        received: 'Hemos recibido tu mensaje.',
         code: 'Tu código:',
-        note: '¡Guárdalo bien!'
+        note: 'Por favor guarda este código – es la única forma de ver tu respuesta.'
       },
       it: {
-        saved: '✅ Il tuo messaggio è stato salvato!',
+        saved: '✅ Il tuo messaggio è stato inviato con successo!',
+        received: 'Abbiamo ricevuto il tuo messaggio.',
         code: 'Il tuo codice:',
-        note: 'Per favore conservalo!' 
+        note: 'Per favore conserva questo codice – è l’unico modo per leggere la tua risposta.'
       }
     };
 
@@ -101,7 +108,8 @@
           success.style.display = 'block';
           success.innerHTML = `
             <p><strong>${t.saved}</strong></p>
-            <p><strong>${t.code}</strong> <code>${data.code}</code></p>
+            <p>${t.received}</p>
+            <p><strong>${t.code}</strong><br><code style="font-size: 1.4rem; background: #fff; padding: 0.3rem 0.6rem; border-radius: 4px; display: inline-block;">${data.code}</code></p>
             <p>${t.note}</p>
           `;
           form.reset();
