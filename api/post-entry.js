@@ -6,12 +6,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Google Auth mit richtigem \n-Ersatz
+    // Authentifizierung mit kompletter JSON aus Vercel-Umgebungsvariable
     const auth = new google.auth.GoogleAuth({
-      credentials: {
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\n/g, '\n'),
-      },
+      credentials: JSON.parse(process.env.GOOGLE_SERVICE_JSON),
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
@@ -26,7 +23,7 @@ export default async function handler(req, res) {
 
     const existingCodes = (read.data.values || []).map(row => row[5]);
 
-    // Neuen Code generieren
+    // Code generieren
     const generateCode = () => {
       const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
       let code;
@@ -41,7 +38,7 @@ export default async function handler(req, res) {
     const code = generateCode();
     const { type, message, paypal, allowShare } = req.body;
 
-    // Neue Zeile in Google Sheet schreiben
+    // Eintrag ins Sheet schreiben
     await sheets.spreadsheets.values.append({
       spreadsheetId,
       range: 'A2',
@@ -59,7 +56,6 @@ export default async function handler(req, res) {
       },
     });
 
-    // Erfolg zurückgeben
     res.status(200).json({ code });
   } catch (error) {
     console.error('Server Error:', error.response?.data || error.message || error);
