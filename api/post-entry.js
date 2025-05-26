@@ -1,55 +1,59 @@
-import { parse } from 'querystring';
-
-export const config = {
-  api: {
-    bodyParser: false
-  }
-};
+import { google } from 'googleapis';
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Only POST requests allowed' });
   }
 
-  let body = "";
-  req.on("data", chunk => {
-    body += chunk;
-  });
+  try {
+    // Google Service Account Auth
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+      },
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
 
-  req.on("end", async () => {
-    const parsed = parse(body);
+    const sheets = google.sheets({ version: 'v4', auth });
+    const spreadsheetId = process.env.SPREADSHEET_ID;
 
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbwF0jcrVgZHW3BjNTymC4FUt1-xpze8HD0Nv9gDmJldkkT8xAakMvr9Cp-Ib5rGEUjZfA/exec";
+    // Hole vorhandene Codes aus Spalte F
+    const read = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: 'A2:F',
+    });
 
-    try {
-      const gsRes = await fetch(scriptUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: new URLSearchParams(parsed)
-      });
+    const existingCodes = (read.data.values || []).map(row => row[5]);
 
-      const text = await gsRes.text(); // ← roher Text
-      console.log("Google Script Response Text:", text);
+    // Einfacher eindeutiger Code-Generator
+    const generateCode = () => {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let code;
+      do {
+        code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      } while (existingCodes.includes(code));
+      return code;
+    };
 
-      try {
-        const data = JSON.parse(text); // ← validieren
-        if (!data.code) throw new Error("No code in response");
-        return res.status(200).json(data);
-      } catch (err) {
-        return res.status(502).json({
-          error: "Invalid JSON response from Google Script",
-          raw: text
-        });
-      }
+    const code = generateCode();
 
-    } catch (err) {
-      return res.status(500).json({
-        error: "Fetch to Google Script failed",
-        details: err.message
-      });
-    }
-  });
+    const { type, message, paypal, allowShare } = req.body;
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: 'A2',
+      valueInputOption: 'RAW',
+      insertDataOption: 'INSERT_ROWS',
+      requestBody: {
+        values: [[new Date().toISOString(), type, message, paypal || '', allowShare || '', code]],
+      },
+    });
+
+    res.status(200).json({ code });
+  } catch (error) {
+    console.error('Server Error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 }
 
