@@ -47,6 +47,8 @@
   <div id="confirmation" style="margin-top:2rem; display:none;"></div>
 
   <script>
+    const endpoint = "/api/post-entry";
+
     document.getElementById("confessionForm").addEventListener("submit", async function(e) {
       e.preventDefault();
 
@@ -58,19 +60,26 @@
       };
 
       try {
-        const res = await fetch("/api/post-entry", {
+        const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
         });
 
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`Fehler beim Absenden: ${errorText}`);
+        }
+
         const result = await res.json();
         const confirmation = document.getElementById("confirmation");
         confirmation.style.display = "block";
         confirmation.innerHTML = `<strong>Dein Code lautet:</strong> <code>${result.code}</code><br>Bitte gut notieren!`;
+
         document.getElementById("confessionForm").reset();
-      } catch (error) {
-        console.error("Fehler beim Absenden:", error);
+      } catch (err) {
+        alert(err.message);
+        console.error(err);
       }
     });
 
@@ -144,6 +153,11 @@
           opt.textContent = translations[lang][key];
         }
       });
+    }
+  </script>
+</body>
+</html>
+
     }
   </script>
 </body>
