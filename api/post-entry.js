@@ -30,18 +30,25 @@ export default async function handler(req, res) {
         body: new URLSearchParams(parsed)
       });
 
-      const text = await gsRes.text();
+      const text = await gsRes.text(); // ← roher Text
+      console.log("Google Script Response Text:", text);
 
       try {
-        const data = JSON.parse(text);
+        const data = JSON.parse(text); // ← validieren
         if (!data.code) throw new Error("No code in response");
         return res.status(200).json(data);
       } catch (err) {
-        return res.status(502).json({ error: "Invalid response from script", raw: text });
+        return res.status(502).json({
+          error: "Invalid JSON response from Google Script",
+          raw: text
+        });
       }
 
     } catch (err) {
-      return res.status(500).json({ error: "Server error", message: err.message });
+      return res.status(500).json({
+        error: "Fetch to Google Script failed",
+        details: err.message
+      });
     }
   });
 }
