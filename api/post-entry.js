@@ -6,7 +6,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Google Service Account Auth
     const auth = new google.auth.GoogleAuth({
       credentials: {
         client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
@@ -18,7 +17,6 @@ export default async function handler(req, res) {
     const sheets = google.sheets({ version: 'v4', auth });
     const spreadsheetId = process.env.SPREADSHEET_ID;
 
-    // Hole vorhandene Codes aus Spalte F
     const read = await sheets.spreadsheets.values.get({
       spreadsheetId,
       range: 'A2:F',
@@ -26,7 +24,6 @@ export default async function handler(req, res) {
 
     const existingCodes = (read.data.values || []).map(row => row[5]);
 
-    // Einfacher eindeutiger Code-Generator
     const generateCode = () => {
       const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
       let code;
@@ -37,7 +34,6 @@ export default async function handler(req, res) {
     };
 
     const code = generateCode();
-
     const { type, message, paypal, allowShare } = req.body;
 
     await sheets.spreadsheets.values.append({
@@ -46,13 +42,20 @@ export default async function handler(req, res) {
       valueInputOption: 'RAW',
       insertDataOption: 'INSERT_ROWS',
       requestBody: {
-        values: [[new Date().toISOString(), type, message, paypal || '', allowShare || '', code]],
+        values: [[
+          new Date().toISOString(),
+          type,
+          message,
+          paypal || '',
+          allowShare || '',
+          code
+        ]],
       },
     });
 
     res.status(200).json({ code });
   } catch (error) {
-    console.error('Server Error:', error);
+    console.error('Server Error:', error.response?.data || error.message || error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
