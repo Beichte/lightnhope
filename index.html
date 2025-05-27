@@ -69,7 +69,9 @@
     <label id="label-type" for="type">I want to:</label><br>
     <select name="type" id="type">
       <option value="Confess something">Confess something</option>
-      <option value="Ask for support">Ask for support</option>
+      <option value="Ask for help">Ask for help</option>
+      <option value="Offer support">Offer support</option>
+      <option value="Share encouragement">Share encouragement</option>
     </select><br><br>
 
     <label id="label-message" for="message">Your message:</label><br>
@@ -155,6 +157,25 @@
       document.getElementById('label-paypal').innerText = t.form.paypal;
       document.getElementById('label-allow').innerText = t.form.allow;
       document.getElementById('submit').innerText = t.form.submit;
+      // Übersetze Kategorieoptionen
+      const options = document.getElementById('type').options;
+      if (lang === 'de') {
+        options[0].text = 'Etwas beichten';
+        options[1].text = 'Um Hilfe bitten';
+        options[2].text = 'Unterstützung geben';
+      } else if (lang === 'es') {
+        options[0].text = 'Confesar algo';
+        options[1].text = 'Pedir ayuda';
+        options[2].text = 'Dar apoyo';
+      } else if (lang === 'it') {
+        options[0].text = 'Confessare qualcosa';
+        options[1].text = 'Chiedere aiuto';
+        options[2].text = 'Dare supporto';
+      } else {
+        options[0].text = 'Confess something';
+        options[1].text = 'Ask for help';
+        options[2].text = 'Give support';
+      }
       return t;
     }
 
@@ -203,4 +224,3 @@
   </script>
 </body>
 </html>
-
