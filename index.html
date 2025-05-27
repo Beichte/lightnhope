@@ -14,6 +14,23 @@
       max-width: 600px;
       margin: auto;
     }
+    label, input, select, textarea, button {
+      font-size: 1rem;
+    }
+    textarea, input[type="email"], select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    button {
+      background-color: #d6a91c;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      color: white;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+    }
     .success {
       margin-top: 2rem;
       padding: 1.5rem;
@@ -25,29 +42,43 @@
       text-align: center;
       box-shadow: 0 0 10px rgba(0, 128, 0, 0.2);
     }
+    .lang-select {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
   </style>
 </head>
 <body>
 
+  <div class="lang-select">
+    <label for="lang">🌐 Sprache / Language:</label>
+    <select id="lang">
+      <option value="de">Deutsch</option>
+      <option value="en">English</option>
+      <option value="es">Español</option>
+      <option value="it">Italiano</option>
+    </select>
+  </div>
+
   <form id="confess-form">
-    <label>I want to:</label><br>
-    <select name="type">
+    <label id="label-type" for="type">I want to:</label><br>
+    <select name="type" id="type">
       <option value="Confess something">Confess something</option>
       <option value="Ask for support">Ask for support</option>
     </select><br><br>
 
-    <label>Your message:</label><br>
-    <textarea name="message" required></textarea><br><br>
+    <label id="label-message" for="message">Your message:</label><br>
+    <textarea name="message" id="message" rows="4" required></textarea><br><br>
 
-    <label>(Optional) Your PayPal address, if you hope for help:</label><br>
-    <input type="email" name="paypal"><br><br>
+    <label id="label-paypal" for="paypal">(Optional) Your PayPal address, if you hope for help:</label><br>
+    <input type="email" name="paypal" id="paypal"><br><br>
 
     <label>
       <input type="checkbox" name="allowShare">
-      I agree that my message may be shared anonymously.
+      <span id="label-allow">I agree that my message may be shared anonymously.</span>
     </label><br><br>
 
-    <button type="submit">Submit</button>
+    <button type="submit" id="submit">Submit</button>
   </form>
 
   <div id="success" class="success" style="display: none;"></div>
@@ -55,36 +86,78 @@
   <script>
     const form = document.getElementById('confess-form');
     const success = document.getElementById('success');
+    const langSelect = document.getElementById('lang');
 
     const messages = {
       de: {
         saved: '✅ Deine Nachricht wurde erfolgreich gesendet!',
         received: 'Wir haben deine Nachricht erhalten.',
         code: 'Dein Code:',
-        note: 'Bitte notiere dir diesen Code – er ist der einzige Weg, deine Antwort zu lesen.'
+        note: 'Bitte notiere dir diesen Code – er ist der einzige Weg, deine Antwort zu lesen.',
+        form: {
+          type: 'Ich möchte:',
+          message: 'Deine Nachricht:',
+          paypal: '(Optional) Deine PayPal-Adresse, falls du auf Hilfe hoffst:',
+          allow: 'Ich bin einverstanden, dass meine Nachricht anonym geteilt wird.',
+          submit: 'Absenden'
+        }
       },
       en: {
         saved: '✅ Your message has been successfully sent!',
         received: 'We have received your message.',
         code: 'Your code:',
-        note: 'Please save this code – it is the only way to read your answer.'
+        note: 'Please save this code – it is the only way to read your answer.',
+        form: {
+          type: 'I want to:',
+          message: 'Your message:',
+          paypal: '(Optional) Your PayPal address, if you hope for help:',
+          allow: 'I agree that my message may be shared anonymously.',
+          submit: 'Submit'
+        }
       },
       es: {
         saved: '✅ ¡Tu mensaje ha sido enviado con éxito!',
         received: 'Hemos recibido tu mensaje.',
         code: 'Tu código:',
-        note: 'Por favor guarda este código – es la única forma de ver tu respuesta.'
+        note: 'Por favor guarda este código – es la única forma de ver tu respuesta.',
+        form: {
+          type: 'Quiero:',
+          message: 'Tu mensaje:',
+          paypal: '(Opcional) Tu dirección de PayPal si esperas ayuda:',
+          allow: 'Estoy de acuerdo en que mi mensaje se comparta de forma anónima.',
+          submit: 'Enviar'
+        }
       },
       it: {
         saved: '✅ Il tuo messaggio è stato inviato con successo!',
         received: 'Abbiamo ricevuto il tuo messaggio.',
         code: 'Il tuo codice:',
-        note: 'Per favore conserva questo codice – è l’unico modo per leggere la tua risposta.'
+        note: 'Per favore conserva questo codice – è l’unico modo per leggere la tua risposta.',
+        form: {
+          type: 'Desidero:',
+          message: 'Il tuo messaggio:',
+          paypal: '(Opzionale) Il tuo indirizzo PayPal, se speri in aiuto:',
+          allow: 'Accetto che il mio messaggio possa essere condiviso in modo anonimo.',
+          submit: 'Invia'
+        }
       }
     };
 
-    const lang = (navigator.language || 'en').slice(0, 2);
-    const t = messages[lang] || messages['en'];
+    function setLanguage(lang) {
+      const t = messages[lang] || messages['en'];
+      document.getElementById('label-type').innerText = t.form.type;
+      document.getElementById('label-message').innerText = t.form.message;
+      document.getElementById('label-paypal').innerText = t.form.paypal;
+      document.getElementById('label-allow').innerText = t.form.allow;
+      document.getElementById('submit').innerText = t.form.submit;
+      return t;
+    }
+
+    let t = setLanguage(langSelect.value);
+
+    langSelect.addEventListener('change', () => {
+      t = setLanguage(langSelect.value);
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
